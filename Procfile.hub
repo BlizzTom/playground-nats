@@ -1,0 +1,3 @@
+hub-1: nats-server --config ./conf/hub.1.conf
+hub-2: nats-server --config ./conf/hub.2.conf
+hub-3: nats-server --config ./conf/hub.3.conf

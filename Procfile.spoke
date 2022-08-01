@@ -1,0 +1,3 @@
+spoke-1: nats-server --config ./conf/spoke.1.conf
+spoke-2: nats-server --config ./conf/spoke.2.conf
+spoke-3: nats-server --config ./conf/spoke.3.conf

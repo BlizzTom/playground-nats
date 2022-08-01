@@ -16,18 +16,20 @@ nats-server --config ./conf/standalone.conf
 
 This will startup a NATS Cluster (`hub`) with Jetstream running, and a Leaf Node (`spoke`) with Jetstream running connected to the `hub`
 
-### Cluster
+### Hub Nodes
 
 ```bash
-nats-server --config ./conf/1.conf
-nats-server --config ./conf/2.conf
-nats-server --config ./conf/3.conf
+nats-server --config ./conf/hub.1.conf
+nats-server --config ./conf/hub.2.conf
+nats-server --config ./conf/hub.3.conf
 ```
 
-### Leaf Node
+### Spoke Nodes
 
 ```bash
-nats-server --config ./conf/leaf.conf
+nats-server --config ./conf/spoke.1.conf
+nats-server --config ./conf/spoke.2.conf
+nats-server --config ./conf/spoke.3.conf
 ```
 
 ### Creating a Stream
