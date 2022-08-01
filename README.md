@@ -4,6 +4,9 @@ Just a playground for NATS things. This is just for experimentations and figurin
 
 This repository uses [forego](https://github.com/ddollar/forego), however, the commands can be found in the [Procfile](./Procfile).
 
+Nats CLI: 0.0.33
+Nats Server: 2.8.4
+
 ## Jetstream Standalone
 
 This will startup a standalone jetstream enabled NATS server
