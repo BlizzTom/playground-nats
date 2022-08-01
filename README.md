@@ -35,15 +35,6 @@ nats-server --config ./conf/spoke.2.conf
 nats-server --config ./conf/spoke.3.conf
 ```
 
-### STUCK
-
-Currently this is the step where I get stuck, as the servers start throwing a ton of errors:
-
-```
-2022/08/01 14:08:16.195212 [ERR] Received out of order remote server update from: "<SERVER ID>"
-2022/08/01 14:08:16.197120 [ERR] SYSTEM - Processing our own account connection event message: ignored
-```
-
 ### Creating the streams
 
 ```bash
@@ -64,4 +55,3 @@ nats -s 'nats://leaf:password@localhost:4222' --js-domain spoke stream info ORDE
 nats -s 'nats://leaf:password@localhost:4222' pub order.1 "order 1"
 ```
 
-**This currently causes an issue where the hub will get 7 messages and the spoke 3 from that one message**
