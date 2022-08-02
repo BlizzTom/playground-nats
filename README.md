@@ -64,7 +64,7 @@ nats --js-domain spoke stream add --config ./data/orders.json
 ### Create the consumer
 
 ```bash
-nats consumer add ORDERS TEST --target="order.received" --ack explicit --deliver all --max-deliver=-1 --sample 100 --replay=instant --filter="" --max-pending=0 --no-headers-only --backoff=none --deliver-group="" --heartbeat=-1 --no-flow-control
+nats consumer add ORDERS TEST --target="orders.received" --ack explicit --deliver all --max-deliver=-1 --sample 100 --replay=instant --filter="" --max-pending=0 --no-headers-only --backoff=none --deliver-group="" --heartbeat=-1 --no-flow-control
 ```
 
 ### Publish a message

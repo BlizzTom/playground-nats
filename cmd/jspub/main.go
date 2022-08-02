@@ -15,18 +15,22 @@ var (
 	address  = flag.String("address", nats.DefaultURL, "NATS address")
 	subject  = flag.String("subject", "orders.received", "subject to subscribe to")
 	stream   = flag.String("stream", "ORDERS", "stream to use")
-	consumer = flag.String("consumer", "", "consumer group to use")
-	nkeyFile = flag.String("nkey", "./nkey.APP", "Nkey file")
+	consumer = flag.String("consumer", "TEST", "consumer group to use")
+	creds    = flag.String("creds", "./nsc/store/creds/local/APP/pubsub.creds", "Credentials")
 )
 
 func main() {
 	flag.Parse()
 
-	nkeyBits, err := os.ReadFile(*nkeyFile)
+	nkeyBits, err := os.ReadFile(*creds)
 	if err != nil {
 		printE(err)
 	}
 
+	token, err := nkeys.ParseDecoratedJWT(nkeyBits)
+	if err != nil {
+		printE(err)
+	}
 	nkey, err := nkeys.ParseDecoratedNKey(nkeyBits)
 	if err != nil {
 		printE(err)
@@ -36,10 +40,14 @@ func main() {
 	if err != nil {
 		printE(err)
 	}
+
 	nkeySeed, err := nkey.Seed()
 	if err != nil {
 		printE(err)
 	}
+
+	print("Public Key: %s", nkeyPublic)
+	print("Private Key: %s", string(nkeySeed))
 
 	opts := nats.Options{
 		AllowReconnect:     true,
@@ -54,7 +62,6 @@ func main() {
 		ReconnectBufSize:   nats.DefaultReconnectBufSize,
 		DrainTimeout:       nats.DefaultDrainTimeout,
 		Servers:            []string{*address},
-		Nkey:               nkeyPublic,
 		Name:               "Demo Client",
 		AsyncErrorCB: func(conn *nats.Conn, sub *nats.Subscription, err error) {
 			print("Slow subscriber %q", sub.Subject)
@@ -69,6 +76,9 @@ func main() {
 		},
 		DiscoveredServersCB: func(conn *nats.Conn) {
 			print("Discovered new server: %q", conn.ConnectedServerName())
+		},
+		UserJWT: func() (string, error) {
+			return token, nil
 		},
 		ReconnectedCB: func(conn *nats.Conn) {
 			print("Reconnected to server %q", conn.ConnectedServerName())
@@ -96,7 +106,7 @@ func main() {
 	}
 
 	print("%v to Server %s", nc.Status(), nc.ConnectedServerName())
-	subOpts := []nats.SubOpt{nats.MaxAckPending(1)}
+	subOpts := []nats.SubOpt{}
 
 	if *consumer != "" {
 		print("Joining Consumer %s", *consumer)
