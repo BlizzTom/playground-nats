@@ -7,7 +7,12 @@ NSC_CMD="nsc --config-dir ./nsc/config --data-dir ./nsc/data --keystore-dir ./ns
 
 $NSC_CMD add operator --generate-signing-key --sys --name local
 $NSC_CMD add account APP
-$NSC_CMD edit account APP --sk generate --js-streams -1
+$NSC_CMD edit account APP --sk generate \
+    --js-streams -1 \
+    --js-consumer -1 \
+    --js-disk-storage -1 \
+    --js-ha-resources -1 \
+    --js-mem-storage 0
 $NSC_CMD add user --account APP leaf
 $NSC_CMD add user --account APP pubsub
 
