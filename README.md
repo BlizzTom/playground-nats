@@ -39,22 +39,37 @@ nats-server --config ./conf/spoke.2.conf
 nats-server --config ./conf/spoke.3.conf
 ```
 
+### Create some contexts
+
+```
+nats context save --server nats://localhost:4222 --creds ./nsc/store/creds/local/APP/pubsub.creds local-app
+nats context save --server nats://localhost:4222 --creds ./nsc/store/creds/local/SYS/sys.creds local-sys
+```
+
+### Validate the servers are clustered
+
+```
+nats context select local-sys
+nats server ls
+```
+
 ### Creating the streams
 
 ```bash
-nats -s 'nats://localhost:4222' --creds=./nsc/store/creds/local/APP/pubsub.creds --js-domain hub stream add --config ./data/orders.json
-nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds --js-domain spoke stream add --config ./data/orders.json
+nats context select local-app
+nats --js-domain hub stream add --config ./data/orders.json
+nats --js-domain spoke stream add --config ./data/orders.json
 ```
 
 ### Create the consumer
 
 ```bash
-nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds consumer add ORDERS TEST --target="order.received" --ack explicit --deliver all --max-deliver=-1 --sample 100 --replay=instant --filter="" --max-pending=0 --no-headers-only --backoff=none --deliver-group="" --heartbeat=-1 --no-flow-control
+nats consumer add ORDERS TEST --target="order.received" --ack explicit --deliver all --max-deliver=-1 --sample 100 --replay=instant --filter="" --max-pending=0 --no-headers-only --backoff=none --deliver-group="" --heartbeat=-1 --no-flow-control
 ```
 
 ### Publish a message
 
 ```bash
-nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds pub order.1 "order 1"
+nats pub order.1 "order 1"
 ```
 
