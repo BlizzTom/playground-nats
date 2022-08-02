@@ -8,15 +8,38 @@ import (
 	"syscall"
 
 	nats "github.com/nats-io/nats.go"
+	"github.com/nats-io/nkeys"
 )
 
 var (
-	address = flag.String("address", nats.DefaultURL, "NATS address")
-	subject = flag.String("subject", "order.>", "subject to subscribe to")
+	address  = flag.String("address", nats.DefaultURL, "NATS address")
+	subject  = flag.String("subject", "orders.received", "subject to subscribe to")
+	stream   = flag.String("stream", "ORDERS", "stream to use")
+	consumer = flag.String("consumer", "", "consumer group to use")
+	nkeyFile = flag.String("nkey", "./nkey.APP", "Nkey file")
 )
 
 func main() {
 	flag.Parse()
+
+	nkeyBits, err := os.ReadFile(*nkeyFile)
+	if err != nil {
+		printE(err)
+	}
+
+	nkey, err := nkeys.ParseDecoratedNKey(nkeyBits)
+	if err != nil {
+		printE(err)
+	}
+
+	nkeyPublic, err := nkey.PublicKey()
+	if err != nil {
+		printE(err)
+	}
+	nkeySeed, err := nkey.Seed()
+	if err != nil {
+		printE(err)
+	}
 
 	opts := nats.Options{
 		AllowReconnect:     true,
@@ -31,21 +54,32 @@ func main() {
 		ReconnectBufSize:   nats.DefaultReconnectBufSize,
 		DrainTimeout:       nats.DefaultDrainTimeout,
 		Servers:            []string{*address},
+		Nkey:               nkeyPublic,
 		Name:               "Demo Client",
 		AsyncErrorCB: func(conn *nats.Conn, sub *nats.Subscription, err error) {
-			print("Slow subscriber %s", sub.Subject)
+			print("Slow subscriber %q", sub.Subject)
 		},
 		ClosedCB: func(conn *nats.Conn) {
-			print("Connection to server closed")
+			print("Connection to server %q closed", conn.ConnectedServerName())
 		},
 		DisconnectedErrCB: func(conn *nats.Conn, err error) {
-			print("Disconnected from server: %v", err)
+			if err != nil {
+				print("Disconnected from server %q: %v", conn.ConnectedServerName(), err)
+			}
 		},
 		DiscoveredServersCB: func(conn *nats.Conn) {
-			print("Discovered new server: %s", conn.ConnectedAddr())
+			print("Discovered new server: %q", conn.ConnectedServerName())
 		},
 		ReconnectedCB: func(conn *nats.Conn) {
-			print("Reconnected to server")
+			print("Reconnected to server %q", conn.ConnectedServerName())
+		},
+		SignatureCB: func(data []byte) ([]byte, error) {
+			key, err := nkeys.FromSeed(nkeySeed)
+			if err != nil {
+				printE(err)
+			}
+
+			return key.Sign(data)
 		},
 	}
 
@@ -56,15 +90,26 @@ func main() {
 	defer func() { _ = nc.Drain() }()
 	defer nc.Close()
 
-	js, err := nc.JetStream(nats.PublishAsyncMaxPending(1))
+	js, err := nc.JetStream()
 	if err != nil {
 		printE(err)
 	}
 
-	print("Connected to Server Status: %v", nc.Status())
+	print("%v to Server %s", nc.Status(), nc.ConnectedServerName())
+	subOpts := []nats.SubOpt{nats.MaxAckPending(1)}
+
+	if *consumer != "" {
+		print("Joining Consumer %s", *consumer)
+		subOpts = append(subOpts, nats.Bind(*stream, *consumer))
+	}
+
 	sub, err := js.Subscribe(*subject, func(m *nats.Msg) {
 		print("Received a message: %s\n%s\n", m.Subject, string(m.Data))
-	})
+		if err := m.AckSync(); err != nil {
+			print("Failed to ack message: %v", err)
+		}
+		print("Message Acked")
+	}, subOpts...)
 
 	if err != nil {
 		printE(err)

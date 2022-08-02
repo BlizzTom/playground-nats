@@ -7,6 +7,10 @@ This repository uses [forego](https://github.com/ddollar/forego), however, the c
 Nats CLI: 0.0.33
 Nats Server: 2.8.4
 
+## Keys
+
+NKeys used, don't use them, that would be silly.
+
 ## Jetstream Standalone
 
 This will startup a standalone jetstream enabled NATS server
@@ -38,20 +42,19 @@ nats-server --config ./conf/spoke.3.conf
 ### Creating the streams
 
 ```bash
-nats -s 'nats://leaf:password@localhost:4222' --js-domain hub stream add --config ./data/orders.json
-nats -s 'nats://leaf:password@localhost:4222' --js-domain spoke stream add --config ./data/orders.json
+nats -s 'nats://localhost:4222' --creds=./nsc/store/creds/local/APP/pubsub.creds --js-domain hub stream add --config ./data/orders.json
+nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds --js-domain spoke stream add --config ./data/orders.json
 ```
 
-### Validate the streams
+### Create the consumer
 
 ```bash
-nats -s 'nats://leaf:password@localhost:4222' --js-domain hub stream info ORDERS
-nats -s 'nats://leaf:password@localhost:4222' --js-domain spoke stream info ORDERS
+nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds consumer add ORDERS TEST --target="order.received" --ack explicit --deliver all --max-deliver=-1 --sample 100 --replay=instant --filter="" --max-pending=0 --no-headers-only --backoff=none --deliver-group="" --heartbeat=-1 --no-flow-control
 ```
 
 ### Publish a message
 
 ```bash
-nats -s 'nats://leaf:password@localhost:4222' pub order.1 "order 1"
+nats -s 'nats://localhost:4222' ---creds=./nsc/store/creds/local/APP/pubsub.creds pub order.1 "order 1"
 ```
 
