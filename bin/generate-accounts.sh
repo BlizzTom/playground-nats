@@ -4,6 +4,7 @@ rm -rf ./nsc
 mkdir -p ./nsc/{config,data,store}
 
 NSC_CMD="nsc --config-dir ./nsc/config --data-dir ./nsc/data --keystore-dir ./nsc/store"
+export NSC_NO_GIT_IGNORE=true
 
 $NSC_CMD add operator --generate-signing-key --sys --name local
 $NSC_CMD add account APP
