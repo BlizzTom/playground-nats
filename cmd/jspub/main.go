@@ -16,7 +16,7 @@ var (
 	subject  = flag.String("subject", "orders.received", "subject to subscribe to")
 	stream   = flag.String("stream", "ORDERS", "stream to use")
 	consumer = flag.String("consumer", "TEST", "consumer group to use")
-	creds    = flag.String("creds", "./nsc/store/creds/local/APP/pubsub.creds", "Credentials")
+	creds    = flag.String("creds", "./nsc/keys/creds/local/APP/pubsub.creds", "Credentials")
 )
 
 func main() {

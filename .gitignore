@@ -1,2 +1,4 @@
 data/*/jetstream
+data/*/jwt
 data/*/*/jetstream
+data/*/*/jwt
