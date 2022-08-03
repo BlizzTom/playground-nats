@@ -7,41 +7,24 @@ import (
 	"os/signal"
 	"syscall"
 
+	"playground/cmd/creds"
+
 	nats "github.com/nats-io/nats.go"
 	"github.com/nats-io/nkeys"
 )
 
 var (
-	address  = flag.String("address", nats.DefaultURL, "NATS address")
-	subject  = flag.String("subject", "orders.received", "subject to subscribe to")
-	stream   = flag.String("stream", "ORDERS", "stream to use")
-	consumer = flag.String("consumer", "TEST", "consumer group to use")
-	creds    = flag.String("creds", "./nsc/keys/creds/local/APP/pubsub.creds", "Credentials")
+	address        = flag.String("address", nats.DefaultURL, "NATS address")
+	subject        = flag.String("subject", "orders.received", "subject to subscribe to")
+	stream         = flag.String("stream", "ORDERS", "stream to use")
+	consumer       = flag.String("consumer", "TEST", "consumer group to use")
+	credentialFile = flag.String("creds", "./nsc/keys/creds/local/APP/pubsub.creds", "Credentials")
 )
 
 func main() {
 	flag.Parse()
 
-	nkeyBits, err := os.ReadFile(*creds)
-	if err != nil {
-		printE(err)
-	}
-
-	token, err := nkeys.ParseDecoratedJWT(nkeyBits)
-	if err != nil {
-		printE(err)
-	}
-	nkey, err := nkeys.ParseDecoratedNKey(nkeyBits)
-	if err != nil {
-		printE(err)
-	}
-
-	nkeyPublic, err := nkey.PublicKey()
-	if err != nil {
-		printE(err)
-	}
-
-	nkeySeed, err := nkey.Seed()
+	token, nkeyPublic, nkeySeed, err := creds.ParseFile(*credentialFile)
 	if err != nil {
 		printE(err)
 	}

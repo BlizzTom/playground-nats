@@ -49,6 +49,14 @@ After the server is up, you need to run the `nsc push -A -u nats://localhost:422
 
 This will startup a NATS Cluster (`hub`) with Jetstream running, and a Leaf Node (`spoke`) with Jetstream running connected to the `hub`
 
+### Account Server
+
+This repo contains a super basic version of an account server, on startup it will read from the `nsc/store` for accounts and pre-load them. It will respond to Nats SYS Claim request, as well as update the claims from an `nsc push`. Don't use this in production please, its a prototype.
+
+```bash
+go run ./cmd/accountsrv/.
+```
+
 ### Hub Nodes
 
 ```bash
@@ -56,8 +64,6 @@ nats-server --config ./conf/hub.1.conf
 nats-server --config ./conf/hub.2.conf
 nats-server --config ./conf/hub.3.conf
 ```
-
-After the server is up, you need to run the `nsc push -A -u nats://localhost:4222` command. This will push the accounts and users to the nats server.
 
 ### Spoke Nodes
 
@@ -67,7 +73,7 @@ nats-server --config ./conf/spoke.2.conf
 nats-server --config ./conf/spoke.3.conf
 ```
 
-After the server is up, you need to run the `nsc push -A -u nats://localhost:4222` command. This will push the accounts and users to the nats server.
+When the server starts for the first time, you will encounter some errors in the logs about not being able to lookup the account for one of the leaf node connections. This is ok. As soon as the `SYS` leaf node connection is established, the `APP` account can be resolved from the account server connected to the hub. It might be somewhat ideal to have an account server connected to each cluster to prevent this issue.
 
 ### Create some contexts
 
@@ -101,5 +107,11 @@ nats consumer add ORDERS TEST --target="orders.received" --ack explicit --delive
 
 ```bash
 nats pub order.1 "order 1"
+```
+
+### Launch a consumer
+
+```bash
+go run ./cmd/jssub/.
 ```
 
