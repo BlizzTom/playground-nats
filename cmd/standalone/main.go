@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	nats "github.com/nats-io/nats.go"
-	"gopkg.battle.net/logging"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	wg.Add(1)
 	sub, err := nc.Subscribe("hello", func(msg *nats.Msg) {
 		_ = msg.Ack()
-		logging.Infof("Hello, %s!", string(msg.Data))
+		fmt.Printf("Hello, %s!\n", string(msg.Data))
 		wg.Done()
 	})
 
