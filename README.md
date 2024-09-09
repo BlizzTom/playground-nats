@@ -34,7 +34,6 @@ To generate a new set of keys:
 
 Then need to update the [./conf/leaf-remotes.conf](./conf/leaf-remotes.conf) with the correct account NKey Public keys for SYS and APP accounts. These can be found using `nsc describe account --name=<name>` and use the `Account ID` value.
 
-
 ## Jetstream Standalone
 
 This will startup a standalone jetstream enabled NATS server
@@ -77,14 +76,14 @@ When the server starts for the first time, you will encounter some errors in the
 
 ### Create some contexts
 
-```
+```bash
 nats context save --server nats://localhost:4222 --creds ./nsc/keys/creds/local/APP/pubsub.creds local-app
 nats context save --server nats://localhost:4222 --creds ./nsc/keys/creds/local/SYS/sys.creds local-sys
 ```
 
 ### Validate the servers are clustered
 
-```
+```bash
 nats context select local-sys
 nats server ls
 ```
@@ -115,3 +114,33 @@ nats pub order.1 "order 1"
 go run ./cmd/jssub/.
 ```
 
+## Standard Operating Procedures
+
+No procedures
+
+## Knowledgebase Articles
+
+List of knowledgebase articles.
+
+* [KB-001 - Placeholder](docs/KB/KB-001.md)
+
+## Troubleshooting Guides
+
+No guides
+
+## Architecture Decision Records
+
+List of architectural decision records for the project grouped by tags.
+
+### Server
+
+|Index|Status|Tags|Description|
+|-----|------|----|-----------|
+|[ADR-001](docs/ADR/ADR-001.md) | `Proposed` | Server | New Record |
+|[ADR-002](docs/ADR/ADR-002.md) | `Proposed` | Server | New Record |
+
+## Notes
+
+List of assorted notes.
+
+* [Random Notes](docs/NOTES/nats-random.md)
